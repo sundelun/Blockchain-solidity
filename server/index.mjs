@@ -11,9 +11,8 @@ app.use(express.json());
 const server = createServer(app);
 const PORT = process.env.PORT;
 
+// Set up ethers using RPC_URL
 const source = new JsonRpcProvider(process.env.RPC_URL)
-
-console.log("Loaded private key:", process.env.OWNER_PRIVATE_KEY);
 
 // Get the MetaDesk Wallet information
 const wallet = new Wallet(process.env.OWNER_PRIVATE_KEY, source)
