@@ -32,6 +32,18 @@ const DAI = () =>{
         }
     };
 
+    const signInstruction = async () =>{
+        if (!window.ethereum){
+            alert('Unable to connect to MetaMask');
+            return
+        }
+
+        // Ensure wallet is connected
+        await connectWallet();
+
+        
+
+    }
     const types = {
         Instruction: [
           { name: 'action', type: 'string' },
@@ -64,8 +76,16 @@ const DAI = () =>{
                 />
             </div>
 
-            <div>
-            </div>
+            <button onClick={signInstruction}>
+                Sign Instruction
+            </button>
+            {signature && (
+                <div>
+                    <h3>Signed Instruction</h3>
+                    <pre>{signature}</pre>
+                    <pre>{JSON.stringify(messageData, null, 2)}</pre>
+                </div>
+            )}
         </div>
     );
 };
