@@ -11,8 +11,6 @@ const PORT = process.env.PORT;
 
 dotenv.config();
 
-
-
 const source = new JsonRpcProvider(process.env.RPC_URL)
 
 // Get the MetaDesk Wallet information
