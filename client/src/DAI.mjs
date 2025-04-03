@@ -8,13 +8,22 @@ const DAI = () =>{
     const [messageData, setMessageData] = useState(null);
     const [walletAddress, setWalletAddress] = useState('');
 
+    // EIP-712 Domain 
     const domain = {
         name: 'DAI',
         version: '1',
         chainId: 1337,
-        verifyingContract: 'xxxxxxx'
+        verifyingContract: process.env.REACT_APP_CONTRACT_ADDRESS
       };
     
+    const types = {
+        Instruction: [
+          { name: 'action', type: 'string' },
+          { name: 'amount', type: 'uint256' },
+          { name: 'nonce', type: 'uint256' }
+        ]
+    };
+
     // Connect to MetaMask
     const connectWallet = async () =>{
         if (window.ethereum){
@@ -40,17 +49,11 @@ const DAI = () =>{
 
         // Ensure wallet is connected
         await connectWallet();
+        const provider = new JsonRpcProvider(window.ethereum);
+        const signer = provider.getSigner();
 
-        
 
     }
-    const types = {
-        Instruction: [
-          { name: 'action', type: 'string' },
-          { name: 'amount', type: 'uint256' },
-          { name: 'nonce', type: 'uint256' }
-        ]
-    };
 
     return (
         <div>

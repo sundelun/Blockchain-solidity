@@ -1,20 +1,22 @@
-// server/index.mjs
+// server/index.js
 
 import express from 'express';
+import { JsonRpcProvider, Wallet, Contract, verifyTypedData } from 'ethers';
+import {createServer} from 'http';
 import dotenv from 'dotenv';
-import { ethers } from 'hardhat';
+dotenv.config();
 
 const app = express()
 app.use(express.json());
-
+const server = createServer(app);
 const PORT = process.env.PORT;
-
-dotenv.config();
 
 const source = new JsonRpcProvider(process.env.RPC_URL)
 
+console.log("Loaded private key:", process.env.OWNER_PRIVATE_KEY);
+
 // Get the MetaDesk Wallet information
-const wallet = new ethers.Wallet(process.env.OWNER_PRIVATE_KEY, source)
+const wallet = new Wallet(process.env.OWNER_PRIVATE_KEY, source)
 
 // The deployed solidity address
 const contractAddress = process.env.CONTRACT_ADDRESS;
@@ -42,13 +44,13 @@ const types = {
 };
 
 // Initialize the smart contract with all the informations
-const contract = new ethers.Contract(contractAddress, contractABI, wallet);
+const contract = new Contract(contractAddress, contractABI, wallet);
 app.post('/api/process', async (req, res) => {
     try{
         const { message, signature } = req.body;
 
         // Verify the signature (EIP-712)
-        const signer = ethers.utils.verifyTypedData(domain, types, message, signature);
+        const signer = verifyTypedData(domain, types, message, signature);
 
         // Only allowed onwener to withdraw
         if (message.action === "withdraw" && signer.toLowerCase() !== wallet.address.toLowerCase()) {
@@ -73,6 +75,6 @@ app.post('/api/process', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Backend running on port ${PORT}`);
 });
