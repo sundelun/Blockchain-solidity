@@ -4,9 +4,11 @@ import express from 'express';
 import { JsonRpcProvider, Wallet, Contract, verifyTypedData } from 'ethers';
 import {createServer} from 'http';
 import dotenv from 'dotenv';
+import cors from 'cors';
 dotenv.config();
 
 const app = express()
+app.use(cors());
 app.use(express.json());
 const server = createServer(app);
 const PORT = process.env.PORT;
