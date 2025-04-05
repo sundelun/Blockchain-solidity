@@ -3,6 +3,7 @@
 import express from 'express';
 import { JsonRpcProvider, Wallet, Contract, verifyTypedData } from 'ethers';
 import {createServer} from 'http';
+import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import cors from 'cors';
 dotenv.config();
@@ -13,6 +14,14 @@ app.use(express.json());
 const server = createServer(app);
 const PORT = process.env.PORT;
 
+// Initialize Socket.IO server
+const io = new Server(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+    }
+});
+
 // Set up ethers using RPC_URL
 const source = new JsonRpcProvider(process.env.RPC_URL)
 
@@ -22,11 +31,20 @@ const wallet = new Wallet(process.env.OWNER_PRIVATE_KEY, source)
 // The deployed solidity address
 const contractAddress = process.env.CONTRACT_ADDRESS;
 
+// Token address
+const tokenAddress = process.env.DAI_TOKEN_ADDRESS;
+
 // Two functions in solidity
 const contractABI = [
     "function deposit(uint256 amount) external",
     "function withdraw(uint256 amount) external"
 ];
+
+// For reading the token balance, use a minimal ERC20 ABI
+const ERC20_ABI = [
+    "function balanceof(address) view returns (uint256)"
+];
+const tokenContract = new Contract(tokenAddress, ERC20_ABI, source);
 
 // Define EIP-712 Domain and Types
 const domain = {
@@ -69,12 +87,33 @@ app.post('/api/process', async (req, res) => {
         }
         // Wait for transaction to be finished
         await ans.wait()
-        res.json({ success: true, txHash: ans.hash });
+
+        // updated new balance by websocket
+        const newBalance = await tokenContract.balanceOf(contract);
+        io.emit('balanceUpdated', { balance: newBalance.toString() });
+
+        res.json({ success: true, txHash: ans.hash, newBalance: newBalance.toString() });
     }catch(error){
         console.log("Error occured:", error);
         res.status(500).json({ error: error.message });
     }
 });
+
+// socket.io connections
+io.on('connection', (socket) => {
+    console.log("New WebSocket connected:", socket.id);
+  
+    // When a client connects, send the current balance
+    tokenContract.balanceof(contract)
+      .then(balance => {
+        socket.emit('balanceUpdated', { balance: balance.toString() });
+      })
+      .catch(console.error);
+  
+    socket.on('disconnect', () => {
+      console.log("Client disconnected:", socket.id);
+    });
+  });
 
 server.listen(PORT, () => {
     console.log(`Backend running on port ${PORT}`);
