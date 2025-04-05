@@ -104,11 +104,14 @@ io.on('connection', (socket) => {
     console.log("New WebSocket connected:", socket.id);
   
     // When a client connects, send the current balance
-    tokenContract.balanceOf(contract)
-      .then(balance => {
-        socket.emit('balanceUpdated', { balance: balance.toString() });
-      })
-      .catch(console.error);
+    socket.on("requestBalance", async () => {
+      try {
+        const balance = await tokenContract.balanceOf(contractAddress);
+        socket.emit("balanceUpdated", { balance: balance.toString() });
+      } catch (err) {
+        console.error(err);
+      }
+    });
   
     socket.on('disconnect', () => {
       console.log("Client disconnected:", socket.id);

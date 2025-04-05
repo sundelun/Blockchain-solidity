@@ -53,6 +53,27 @@ const DAI = () =>{
         }
     };
 
+    const disconnectWallet = () => {
+        setBalance(null);
+        setWalletAddress('');
+    };
+
+    useEffect(() => {
+        if (window.ethereum) {
+          const handleAccountsChanged = (accounts) => {
+            if (accounts && accounts.length > 0) {
+              console.log("Accounts changed:", accounts);
+              setWalletAddress(accounts[0]);
+            } else {
+              setWalletAddress('');
+            }
+          };
+          window.ethereum.on('accountsChanged', handleAccountsChanged);
+          return () => {
+            window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+          };
+        }
+    }, []);
     // Connect to the backend via WebSocket
     useEffect(() => {
         const socketClient = io(SOCKET_URL);
@@ -78,6 +99,12 @@ const DAI = () =>{
             socketClient.disconnect();
         };
     }, [SOCKET_URL]);
+
+    useEffect(() => {
+        if (walletAddress && socket) {
+          socket.emit("requestBalance");
+        }
+      }, [walletAddress, socket]);    
 
     // Sign the instruction
     const signInstruction = async () =>{
@@ -135,6 +162,7 @@ const DAI = () =>{
     return (
         <div>
             <h2>DAI</h2>
+            <button onClick={disconnectWallet}>Disconnect</button>
             <button onClick={connectWallet}>
                 {walletAddress ? `Connected: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Connect Wallet'}
             </button>

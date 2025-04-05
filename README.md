@@ -125,5 +125,9 @@ Solidity documentation: https://docs.soliditylang.org/en/v0.8.29/#
 
 Video to start workong on solidity project: https://www.youtube.com/watch?v=p6AFi5vpSkc
 
+A great example of contract project implementation: https://github.com/jscriptcoder/lottery-contract
+
+A detailed article explain its project: https://medium.com/@jscriptcoder/my-first-taste-of-building-a-web3-app-with-solidity-react-and-typescript-32660d44e797
+
 Syntax fix or version compatible fix: chatgpt
 
