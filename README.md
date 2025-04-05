@@ -95,6 +95,7 @@ npm install
 Create a .env file with following:
 ```shell
 REACT_APP_CONTRACT_ADDRESS=0xYOUR_DAI_CONTRACT_ADDRESS # Same as backend side CONTRACT_ADDRESS
+REACT_APP_DAI_TOKEN_ADDRESS=0xYOUR_DAI_TOKEN_ADDRESS # Same as backend side DAI_TOKEN_ADDRESS
 REACT_APP_API_BASE_URL=http://localhost:3001/api
 REACT_APP_SOCKET_URL=http://localhost:3001
 ```
