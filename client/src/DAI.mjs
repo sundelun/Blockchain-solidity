@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import { Wallet, Contract, parseUnits, BrowserProvider, TypedDataEncoder } from 'ethers';
 import { arrayify } from '@ethersproject/bytes';
-
+import { io } from 'socket.io-client';
 
 const DAI = () =>{
     const [action, setAction] = useState('deposit');
@@ -10,9 +10,13 @@ const DAI = () =>{
     const [messageData, setMessageData] = useState(null);
     const [walletAddress, setWalletAddress] = useState('');
     const [response, setResponse] = useState(null);
+    const [balance, setBalance] = useState(null);
+    const [socket, setSocket] = useState(null);
 
+    // Api used for interact with backend
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
+    const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
     // EIP-712 Domain 
     const domain = {
         name: 'DAI',
@@ -48,6 +52,32 @@ const DAI = () =>{
         }
     };
 
+    // Connect to the backend via WebSocket
+    useEffect(() => {
+        const socketClient = io(SOCKET_URL);
+        setSocket(socketClient);
+
+        socketClient.on('connect', () => {
+            console.log('Connected to backend via WebSocket');
+        });
+
+        // Listen for balance updates
+        socketClient.on('balanceUpdated', (data) => {
+            console.log('Balance updated:', data.balance);
+            setBalance(data.balance);
+        });
+
+        // Listen for any API responses
+        socketClient.on('actionResponse', (data) => {
+            console.log('Received action response:', data);
+            setResponse(data);
+        });
+
+        return () => {
+            socketClient.disconnect();
+        };
+    }, [SOCKET_URL]);
+
     // Sign the instruction
     const signInstruction = async () =>{
         if (!window.ethereum){
@@ -66,7 +96,7 @@ const DAI = () =>{
         // Generate the message sent to backend
         const message = {
             action,
-            amount: parseUnits(amount, 18).toString(),
+            amount: parseUnits(amount, 2).toString(),
             nonce
         };
         setMessageData(message);
@@ -107,6 +137,9 @@ const DAI = () =>{
             <button onClick={connectWallet}>
                 {walletAddress ? `Connected: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Connect Wallet'}
             </button>
+            <div>
+                <p>Current Contract Balance: {balance !== null ? balance : "Loading..."}</p>
+            </div>
             <div>
                 <label>Action</label>
                 <select value={action} onChange={(e) => setAction(e.target.value)}>

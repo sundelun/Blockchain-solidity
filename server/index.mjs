@@ -1,4 +1,4 @@
-// server/index.js
+// server/index.mjs
 
 import express from 'express';
 import { JsonRpcProvider, Wallet, Contract, verifyTypedData } from 'ethers';
@@ -42,7 +42,7 @@ const contractABI = [
 
 // For reading the token balance, use a minimal ERC20 ABI
 const ERC20_ABI = [
-    "function balanceof(address) view returns (uint256)"
+    "function balanceOf(address) view returns (uint256)"
 ];
 const tokenContract = new Contract(tokenAddress, ERC20_ABI, source);
 
@@ -89,7 +89,7 @@ app.post('/api/process', async (req, res) => {
         await ans.wait()
 
         // updated new balance by websocket
-        const newBalance = await tokenContract.balanceOf(contract);
+        const newBalance = await tokenContract.balanceOf(contractAddress);
         io.emit('balanceUpdated', { balance: newBalance.toString() });
 
         res.json({ success: true, txHash: ans.hash, newBalance: newBalance.toString() });
@@ -104,7 +104,7 @@ io.on('connection', (socket) => {
     console.log("New WebSocket connected:", socket.id);
   
     // When a client connects, send the current balance
-    tokenContract.balanceof(contract)
+    tokenContract.balanceOf(contract)
       .then(balance => {
         socket.emit('balanceUpdated', { balance: balance.toString() });
       })
