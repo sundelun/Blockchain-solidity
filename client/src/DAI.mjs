@@ -33,6 +33,10 @@ const DAI = () =>{
         ]
     };
 
+    const ERC20_APPROVE_ABI = [
+        "function approve(address spender, uint256 amount) external returns (bool)"
+    ];
+
     // Connect to MetaMask
     const connectWallet = async () =>{
         if (window.ethereum){
@@ -78,6 +82,37 @@ const DAI = () =>{
         };
     }, [SOCKET_URL]);
 
+      // Approve tokens
+    const approveTokens = async () => {
+        if (!window.ethereum) {
+            alert('MetaMask not available');
+            return;
+        }
+        try {
+            // Ensure wallet is connected
+            await connectWallet();
+            const provider = new BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+
+            // Create a token contract instance for approval
+            const tokenContract = new Contract(
+                process.env.REACT_APP_CONTRACT_ADDRESS,
+                ERC20_APPROVE_ABI,
+                signer
+            );
+
+            // Approve the deposit contract to spend tokens on behalf of the user.
+            const approvalAmount = parseUnits("10", 18).toString();
+            const tx = await tokenContract.approve(
+                process.env.REACT_APP_CONTRACT_ADDRESS,
+                approvalAmount
+            );
+            await tx.wait();
+            console.log("Approval successful, tx hash:", tx.hash);
+            } catch (error) {
+                console.error("Approval error:", error);
+            }
+    };
     // Sign the instruction
     const signInstruction = async () =>{
         if (!window.ethereum){
@@ -136,6 +171,9 @@ const DAI = () =>{
             <h2>DAI</h2>
             <button onClick={connectWallet}>
                 {walletAddress ? `Connected: ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Connect Wallet'}
+            </button>
+            <button onClick={approveTokens} style={{ marginTop: '10px' }}>
+                Approve Tokens
             </button>
             <div>
                 <p>Current Contract Balance: {balance !== null ? balance : "Loading..."}</p>

@@ -106,7 +106,17 @@ npm start
 
 Expected output:
 ```shell
-Your web compiled succesfully
+Compiled successfully!
+
+You can now view client in the browser.
+
+  Local:            http://localhost:3000
+  On Your Network:  http://192.168.22.131:3000
+
+Note that the development build is not optimized.
+To create a production build, use npm run build.
+
+webpack compiled successfully
 ```
 And the browser should be automatically open and you can start playing around it!
 <br><br>
