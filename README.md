@@ -130,8 +130,11 @@ And the browser should be automatically open and you can start playing around it
 
 - `scripts/`: Directory for deploy contracts
 
+- `test/`: Directory for testing functionalities in smart contract
+
 ### contracts
 - `DAI.sol`: This contract handles the deposit and withdraw implementation. It uses an ERC20 interface to interact with a token by calling `transferFrom` for deposits and `transfer` for withdraw. Only owner can use withdraw method.
+- `MockDAI.sol`: Supporting a mock DAI for testing functionalities.
 
 ### server
 The backend server is built with Express and Socket.IO with file `index.mjs`
@@ -146,6 +149,9 @@ The React frontend provides the user interface, wallet connection and transactio
 - Sign and Send instructions: The user can select whether they want to deposit/withdraw, enter an amount, and then sign an EIP-712 message with their wallet.
 - Real-time updates: The frontend also establishes a WebSocket connection to listen for balance updates.
 
+### test
+The test directory is to test all the functionalities in smart contracts, such as deposit withdraw deploy and balance after operations is same expected.
+
 
 <br><br>
 
@@ -158,5 +164,7 @@ A great example of contract project implementation: https://github.com/jscriptco
 
 A detailed article explain its project: https://medium.com/@jscriptcoder/my-first-taste-of-building-a-web3-app-with-solidity-react-and-typescript-32660d44e797
 
-Syntax fix or version compatible fix: chatgpt
+A video to setup testing smart contract: https://www.youtube.com/watch?v=36r1nu1aIbc
+
+Syntax fix or version compatible fix: chatgpt/copilot
 
