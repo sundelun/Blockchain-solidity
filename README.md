@@ -1,6 +1,6 @@
 # Blockchain-solidity
 
-This repo is designed for design some functionalities of smart contract and interact with frontend and backend. Detailed documentation coming soon...
+This repository is designed to demonstrate a full-stack decentralized application (DApp) that interacts with smart contract functionalities. The project show a complete process of a smart contract that enables token deposits and withdraw operations while interact with a backend server and a frontend client.
 
 ## Installation
 Clone the repository
