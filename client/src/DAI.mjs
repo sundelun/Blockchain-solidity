@@ -33,7 +33,43 @@ const DAI = () =>{
         ]
     };
 
-
+    const ERC20_APPROVE_ABI = [
+        "function approve(address spender, uint256 amount) external returns (bool)"
+    ];
+      
+    // Approve tokens for the deposit contract to spend on your behalf
+    const approveTokens = async () => {
+        if (!window.ethereum) {
+            alert('MetaMask not available');
+            return;
+        }
+        try {
+        // Ensure wallet is connected (you can call your connectWallet function)
+            await connectWallet();
+            
+            // Create a BrowserProvider and get the signer from MetaMask
+            const provider = new BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+        
+            // Create a token contract instance using the token address from your env and the minimal approve ABI
+            const tokenContract = new Contract(
+                process.env.REACT_APP_DAI_TOKEN_ADDRESS,
+                ERC20_APPROVE_ABI,
+                signer
+            );
+        
+            // Define the amount you want to approve (for example, 10 tokens with 18 decimals)
+            const approvalAmount = parseUnits("10", 18).toString();
+            
+            // Call approve with the deposit contract address as the spender
+            const tx = await tokenContract.approve(process.env.REACT_APP_CONTRACT_ADDRESS, approvalAmount);
+            await tx.wait();
+            console.log("Approval successful, tx hash:", tx.hash);
+            } catch (error) {
+                console.error("Approval error:", error);
+            }
+    };
+  
     // Connect to MetaMask
     const connectWallet = async () =>{
         if (window.ethereum){
@@ -189,6 +225,9 @@ const DAI = () =>{
 
             <button onClick={signInstruction}>
                 Sign Instruction
+            </button>
+            <button onClick={approveTokens} style={{ marginTop: '10px' }}>
+                Approve Tokens
             </button>
             {signature && (
                 <div>
