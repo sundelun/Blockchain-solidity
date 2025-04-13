@@ -1,15 +1,18 @@
 // scripts/deploy.js
 
 async function main() {
-    const DAI = await ethers.getContractFactory("DAI");
-  
-    // The DAI token to deploy
-    const dai = await DAI.deploy("0x6B175474E89094C44Da98b954EedeAC495271d0F");
-  
-    // Wait for deployment to be mined
-    await dai.waitForDeployment();
-  
-    console.log("DAI contract deployed to:", dai.target);
+    const [deployer] = await ethers.getSigners();
+    console.log("Deploying DAI deposit contract with account:", deployer.address);
+
+    // 2) point at the mock you just deployed (or real DAI on mainnet)
+    const tokenAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+
+    // deploy the DAI deposit contract
+    const DAI = await ethers.getContractFactory("DAI", deployer);
+    const daiDeposit = await DAI.deploy(tokenAddress);
+    await daiDeposit.waitForDeployment();
+
+    console.log("DAI deposit contract deployed to:", daiDeposit.target);
   }
   
 // Execute the deployment script

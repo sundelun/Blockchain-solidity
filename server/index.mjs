@@ -36,7 +36,7 @@ const tokenAddress = process.env.DAI_TOKEN_ADDRESS;
 
 // Two functions in solidity
 const contractABI = [
-    "function deposit(uint256 amount) external",
+    "function depositFor(address user, uint256 amount, bytes signature) external",
     "function withdraw(uint256 amount) external"
 ];
 
@@ -50,12 +50,13 @@ const tokenContract = new Contract(tokenAddress, ERC20_ABI, source);
 const domain = {
     name: 'DAI',
     version: '1',
-    chainId: parseInt(process.env.CHAIN_ID),
+    chainId: parseInt(process.env.CHAIN_ID, 10),
     verifyingContract: contractAddress
   };
 
 const types = {
     Instruction: [
+      { name: 'user',   type: 'address' },
       { name: 'action', type: 'string' },
       { name: 'amount', type: 'uint256' },
       { name: 'nonce', type: 'uint256' }
@@ -71,15 +72,18 @@ app.post('/api/process', async (req, res) => {
         // Verify the signature (EIP-712)
         const signer = verifyTypedData(domain, types, message, signature);
 
+        
         // Only allowed onwener to withdraw
-        if (message.action === "withdraw" && signer.toLowerCase() !== wallet.address.toLowerCase()) {
+        //console.log(message.user, wallet.address.toLowerCase())
+        if (message.action === "withdraw" && message.user.toLowerCase() !== wallet.address.toLowerCase()) {
             return res.status(403).json({ error: "Only the owner can withdraw." });
         }
 
         // Call the smart contract based on the action
         let ans;
         if (message.action === "deposit") {
-            ans = await contract.deposit(message.amount);
+            console.log("Recovered signer:", message.user, "Amount:", message.amount, "Signature:", signature);
+            ans = await contract.depositFor(message.user, message.amount, signature);
           } else if (message.action === "withdraw") {
             ans = await contract.withdraw(message.amount);
           } else {

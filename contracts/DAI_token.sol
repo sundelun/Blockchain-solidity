@@ -33,11 +33,23 @@ contract DAI{
         daiToken = IERC20(_daiTokenAddress);
     }
 
+    /*
     // deposit the DAI tokens to account(Move DAI from a user's wallet to their contract)
     function deposit(uint256 amount) external{
         // the sender must approve to deposit DAI into their contract
         require(daiToken.transferFrom(msg.sender, address(this), amount), "DAI deposit failed");
         emit Deposit(msg.sender, amount);
+    }
+    */
+    function depositFor(
+      address user,
+      uint256 amount,
+      bytes calldata sig
+    ) external {
+      require( daiToken.transferFrom(user, address(this), amount), "DAI deposit failed");
+      //daiToken.transferFrom(user, address(this), amount);
+      
+      emit Deposit(user, amount);
     }
 
     // writhdraw DAI from the contract to the owner's wallet

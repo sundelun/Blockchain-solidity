@@ -2,6 +2,7 @@ import React, { useState, useEffect} from 'react';
 import { Wallet, Contract, parseUnits, BrowserProvider, TypedDataEncoder } from 'ethers';
 import { arrayify } from '@ethersproject/bytes';
 import { io } from 'socket.io-client';
+import { parseEther } from "@ethersproject/units";
 
 const DAI = () =>{
     const [action, setAction] = useState('deposit');
@@ -17,23 +18,45 @@ const DAI = () =>{
     const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
     const SOCKET_URL = process.env.REACT_APP_SOCKET_URL;
-    // EIP-712 Domain 
-    const domain = {
-        name: 'DAI',
-        version: '1',
-        chainId: 1337,
-        verifyingContract: process.env.REACT_APP_CONTRACT_ADDRESS
-      };
     
-    const types = {
-        Instruction: [
-          { name: 'action', type: 'string' },
-          { name: 'amount', type: 'uint256' },
-          { name: 'nonce', type: 'uint256' }
-        ]
+
+
+    const ERC20_APPROVE_ABI = [
+        "function approve(address spender, uint256 amount) external returns (bool)"
+    ];
+      
+    // Approve tokens for the deposit contract
+    const approveTokens = async () => {
+        if (!window.ethereum) {
+            alert('MetaMask not available');
+            return;
+        }
+        try {
+            // Ensure wallet is connected 
+            await connectWallet();
+            
+            // Create a BrowserProvider and get the signer from MetaMask
+            const provider = new BrowserProvider(window.ethereum);
+            const signer = await provider.getSigner();
+        
+            // Create a token contract instance 
+            const tokenContract = new Contract(
+                process.env.REACT_APP_DAI_TOKEN_ADDRESS,
+                ERC20_APPROVE_ABI,
+                signer
+            );
+        
+            // Define the amount you want to approve
+            const approvalAmount = parseEther("10").toString();
+            
+            // Call approve with the deposit contract address as the spender
+            const tx = await tokenContract.approve(process.env.REACT_APP_CONTRACT_ADDRESS, approvalAmount);
+            await tx.wait();
+            console.log("Approval successful, tx hash:", tx.hash);
+            } catch (error) {
+                console.error("Approval error:", error);
+            }
     };
-
-
     // Connect to MetaMask
     const connectWallet = async () =>{
         if (window.ethereum){
@@ -119,12 +142,31 @@ const DAI = () =>{
         // Get the informations of wallet
         const provider = new BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();
-
+        const user = await signer.getAddress();
+        const { chainId } = await provider.getNetwork();
         const nonce = Date.now();
+
+        // EIP-712 Domain 
+        const domain = {
+            name: 'DAI',
+            version: '1',
+            chainId,
+            verifyingContract: process.env.REACT_APP_CONTRACT_ADDRESS
+        };
+
+        const types = {
+            Instruction: [
+              { name: 'user',   type: 'address' },
+              { name: 'action', type: 'string' },
+              { name: 'amount', type: 'uint256' },
+              { name: 'nonce', type: 'uint256' }
+            ]
+        };
         // Generate the message sent to backend
         const message = {
+            user,
             action,
-            amount: parseUnits(amount, 2).toString(),
+            amount: parseEther(amount).toString(),
             nonce
         };
         setMessageData(message);
@@ -132,6 +174,7 @@ const DAI = () =>{
             // Setting the signature
             const digest = TypedDataEncoder.hash(domain, types, message);
             const sig = await signer.signMessage(arrayify(digest));
+            setWalletAddress(user);
             setSignature(sig);
             console.log('Signature:', sig);
         }catch (error) {
@@ -186,7 +229,9 @@ const DAI = () =>{
                     onChange={(e) => setAmount(e.target.value)}
                 />
             </div>
-
+            <button onClick={approveTokens} style={{ marginTop: '10px' }}>
+                Approve Tokens
+            </button>
             <button onClick={signInstruction}>
                 Sign Instruction
             </button>

@@ -9,7 +9,7 @@ async function main() {
   const initialSupply = parseEther("1000000").toString();
 
   // Get the contract factory for MockDAI
-  const MockDAI = await ethers.getContractFactory("MockDAI");
+  const MockDAI = await ethers.getContractFactory("MockDAI", deployer);
   
   // Deploy the contract with the initial supply
   const mockDAI = await MockDAI.deploy(initialSupply);
