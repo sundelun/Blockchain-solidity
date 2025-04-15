@@ -32,7 +32,7 @@ describe("DAI Deposit Contract", function () {
     await mockDAI.connect(user).approve(daiDepositContract.target, depositAmount);
 
     // User deposits tokens
-    const tx = await daiDepositContract.connect(user).deposit(depositAmount);
+    const tx = await daiDepositContract.connect(user).depositFor(user.address, depositAmount, "0x");
     const receipt = await tx.wait();
 
     // Iterate over the event to find the deposit event
@@ -63,7 +63,7 @@ describe("DAI Deposit Contract", function () {
   it("should revert when a non-owner attempts to withdraw", async function () {
     // User approves and deposits tokens into the contract
     await mockDAI.connect(user).approve(daiDepositContract.target, depositAmount);
-    await daiDepositContract.connect(user).deposit(depositAmount);
+    await daiDepositContract.connect(user).depositFor(user.address, depositAmount, "0x");
 
     // Attempt withdrawal by a non-owner
     // expect to block withdraw
@@ -75,7 +75,7 @@ describe("DAI Deposit Contract", function () {
   it("should allow the owner to withdraw tokens", async function () {
     // User first approves and deposits tokens
     await mockDAI.connect(user).approve(daiDepositContract.target, depositAmount);
-    await daiDepositContract.connect(user).deposit(depositAmount);
+    await daiDepositContract.connect(user).depositFor(user.address, depositAmount, "0x");
 
     // Verify the deposit contract holds the tokens
     let contractBalance = await mockDAI.balanceOf(daiDepositContract.target);
