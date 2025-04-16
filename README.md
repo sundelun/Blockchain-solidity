@@ -1,6 +1,8 @@
 # Blockchain-solidity
 
-This repository is designed to demonstrate a full-stack decentralized application (DApp) that interacts with smart contract functionalities. The project show a complete process of a smart contract that enables token deposits and withdraw operations while interact with a backend server and a frontend client.
+This repository is designed to demonstrate a full-stack decentralized application (DApp) that interacts with smart contract functionalities. The project show a complete process of a smart contract that enables token deposits and withdraw operations while interact with a backend server and a frontend client. 
+
+### Branch main-v2 is the final version!
 
 ## Installation
 Clone the repository
@@ -35,10 +37,24 @@ Started HTTP and WebSocket JSON-RPC server at http://127.0.0.1:8545/
 Accounts
 ========
 ```
+Compile and run the scripts for deploying mock DAI address
+```shell
+npx hardhat compile
+npx hardhat run scripts/deploy-mockDai.js --network localhost
+```
+The expected output should be
+```shell
+MockDAI deployed to:0xYOUR_DAI_TOKEN_ADDRESS
+```
+Remember the token address, we need to use it in future.
+
+Create a .env file under directory of scripts as following:
+```shell
+MOCKDAI=0xYOUR_DAI_TOKEN_ADDRESS
+```
 
 Compile and deploy the smart contract address by running scripts
 ```shell
-npx hardhat compile
 npx hardhat run scripts/deploy.js --network localhost
 ```
 
@@ -48,15 +64,6 @@ DAI contract deployed to: 0xYOUR_DAI_CONTRACT_ADDRESS
 ```
 Remember the contract address, we need to use it in future.<br><br>
 
-Then run the scripts for deploying token address
-```shell
-npx hardhat run scripts/deploy-mockDai.js --network localhost
-```
-The expected output should be
-```shell
-MockDAI deployed to:0xYOUR_DAI_TOKEN_ADDRESS
-```
-Remember the token address, we need to use it in future.
 <br><br>
 
 ### Setup the server side
