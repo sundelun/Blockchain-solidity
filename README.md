@@ -2,6 +2,8 @@
 
 This repository is designed to demonstrate a full-stack decentralized application (DApp) that interacts with smart contract functionalities. The project show a complete process of a smart contract that enables token deposits and withdraw operations while interact with a backend server and a frontend client.
 
+### Branch main-v2 is the final version!
+
 ## Installation
 Clone the repository
 ```shell
